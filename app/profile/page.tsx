@@ -1,40 +1,37 @@
 "use client"
 
-import { useUser } from "@clerk/nextjs"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { useUser } from "@clerk/nextjs"
 import {
-  User,
-  Mail,
-  Calendar,
-  TrendingUp,
-  Zap,
   Activity,
-  BarChart3,
-  PieChart,
-  LineChart,
-  Settings,
-  Download,
   AlertTriangle,
+  Calendar,
   CheckCircle,
   Clock,
+  Download,
+  Mail,
+  Settings,
+  TrendingUp,
+  User,
+  Zap
 } from "lucide-react"
 import {
-  LineChart as RechartsLineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  BarChart as RechartsBarChart,
-  Bar,
-  PieChart as RechartsPieChart,
-  Cell,
   Area,
   AreaChart,
+  Bar,
+  CartesianGrid,
+  Cell,
+  Line,
+  BarChart as RechartsBarChart,
+  LineChart as RechartsLineChart,
+  PieChart as RechartsPieChart,
+  ResponsiveContainer,
+  Tooltip,
+  XAxis,
+  YAxis,
 } from "recharts"
 
 // Mock data for analytics
