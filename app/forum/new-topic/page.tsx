@@ -24,8 +24,10 @@ import {
 } from "@/components/ui/select";
 import { ArrowLeft, Send } from "lucide-react";
 import {useRouter} from "next/navigation";
+import { useUser } from '@clerk/nextjs'
 
 export default function NewTopicPage() {
+    const { user } = useUser()
     const [title, setTitle] = useState("");
     const [content, setContent] = useState("");
     const [category, setCategory] = useState("");
@@ -34,31 +36,31 @@ export default function NewTopicPage() {
     const router=useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setIsSubmitting(true);
+        e.preventDefault()
+        setIsSubmitting(true)
+
+        // Prepare author and avatar from Clerk user
+        const author =
+            user?.firstName && user?.lastName
+                ? `${user.firstName} ${user.lastName}`
+                : user?.username || user?.primaryEmailAddress?.emailAddress || 'Anonymous'
+        const avatar = user?.imageUrl || '/placeholder.svg?height=40&width=40'
 
         try {
             const response = await fetch('/api/topics', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     title,
                     content,
                     category,
-                    tags: tags.split(',').map((tag) => tag.trim()), // Convert tags to an array
-                    author: 'self', // Replace with the actual author if available
-                    avatar: '/placeholder.svg?height=40&width=40', // Default avatar
+                    tags: tags.split(',').map((tag) => tag.trim()),
+                    author,
+                    avatar,
                 }),
-            });
-
-            if (!response.ok) {
-                throw new Error('Failed to create topic');
-            }
-
-            // Redirect to the forum page after successful submission
-            router.push('/forum');
+            })
+            if (!response.ok) throw new Error('Failed to create topic')
+            router.push('/forum')
         } catch (error) {
             console.error('Error creating topic:', error);
             setIsSubmitting(false);

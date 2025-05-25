@@ -16,26 +16,26 @@ export async function GET() {
 }
 
 export async function POST(req: Request) {
-	try {
-		const body = await req.json()
+    try {
+        const body = await req.json()
 
-		const newTopic = await prisma.topic.create({
-			data: {
-				title: body.title,
-				content: body.content,
-				category: body.category,
-				tags: body.tags, // Assuming tags is an array
-				author: body.author,
-				avatar: body.avatar,
-				replies: 0, // Default value for new topics
-				views: 0, // Default value for new topics
-				lastActivity: String(new Date()), // Set to the current date
-			},
-		})
+        const newTopic = await prisma.topic.create({
+            data: {
+                title: body.title,
+                content: body.content,
+                category: body.category,
+                tags: body.tags,
+                author: body.author,
+                avatar: body.avatar,
+                replies: 0,
+                views: 0,
+                lastActivity: String(new Date()),
+            },
+        })
 
-		return NextResponse.json(newTopic, { status: 201 })
-	} catch (error) {
-		console.error('Error creating topic:', error)
-		return NextResponse.json({ error: 'Failed to create topic' }, { status: 500 })
-	}
+        return NextResponse.json(newTopic, { status: 201 })
+    } catch (error) {
+        console.error('Error creating topic:', error)
+        return NextResponse.json({ error: 'Failed to create topic' }, { status: 500 })
+    }
 }

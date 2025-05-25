@@ -18,10 +18,21 @@ model Topic {
   title        String
   content      String?
   category     String
-  tags         String[] // Array of tags
+  tags         String[]
   author       String
   avatar       String
   replies      Int      @default(0)
   views        Int      @default(0)
   lastActivity String
+  replyList    Reply[]  @relation("TopicReplies")
+}
+
+model Reply {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  content   String
+  author    String
+  avatar    String
+  createdAt DateTime @default(now())
+  topicId   String
+  topic     Topic    @relation(fields: [topicId], references: [id], name: "TopicReplies")
 }
