@@ -40,20 +40,38 @@ export default function HarmonicCalculator() {
     const rate = Math.max(Number.parseFloat(electricityRate), 0.01); // Prevents zero rate
 
     if (capacity <= 0 || load <= 0 || hours <= 0 || rate < 0) {
-        alert("Invalid input values. Ensure all inputs are positive numbers.");
-        return;
+      alert("Invalid input values. Ensure all inputs are positive numbers.");
+      return;
     }
 
     // Improved harmonic loss calculation
-    const harmonicLossFactor = 0.4; // More realistic value
-    const annualLosses = capacity * load * (1 + harmonicLossFactor * harmonics ** 2) * hours * rate;
+    // const harmonicLossFactor = 0.4; // More realistic value
+    // const annualLosses = capacity * load * (1 + harmonicLossFactor * harmonics ** 2) * hours * rate;
 
-    // More realistic penalty calculation
-    const penaltyFactor = 500;
-    const penalties = harmonics > 0.05 ? capacity * load * penaltyFactor * (harmonics - 0.05) ** 1.5 : 0;
+     //  IEEE Std 519 suggests harmonics increase losses in transformers primarily due to increased I²R losses in the windings and stray losses. The multiplier (0.15) reflects the additional burden caused by THD, though exact values depend on transformer design.
+    const fundamentalLosses = capacity * load * hours * rate;
+    const harmonicLosses = capacity * load * (harmonics ** 2) * 0.15 * hours * rate; // ~15% of harmonic current losses
+    const annualLosses = fundamentalLosses + harmonicLosses;
+
+   
+    // Actual penalty schemes vary by country and utility, but using a per-kVA charge is a more realistic model
+    const penaltyThreshold = 0.05;
+    const penaltyRatePerKVA = 20; // Utility-defined rate per kVA over the limit 
+    const excessHarmonics = harmonics > penaltyThreshold ? harmonics - penaltyThreshold : 0;
+    const penalties = excessHarmonics > 0
+        ? capacity * load * excessHarmonics * penaltyRatePerKVA
+        : 0;
+    
 
     // Improved equipment life reduction using exponential model
-    const equipmentLifeReduction = (1 - Math.exp(-harmonics * 5)) * 100;
+      
+    //This approximates insulation aging using Arrhenius’ Law, where every 6–10°C rise cuts life in half.
+    const tempRiseDueToHarmonics = 30 * harmonics; // 30°C extra at 100% THD
+const lifeReduction = 1 - Math.exp(-tempRiseDueToHarmonics / 60); // Based on thermal acceleration
+const equipmentLifeReduction = lifeReduction * 100;
+
+
+
 
     // Total cost
     const totalCost = annualLosses + penalties;
@@ -62,31 +80,36 @@ export default function HarmonicCalculator() {
     const passiveFilterCost = capacity * 100;
     const activeFilterCost = capacity * 250;
 
+    // Determine recommended harmonic mitigation strategy and estimate ROI:
+  // - No mitigation if THD ≤ 5% (typically acceptable per IEEE 519).
+  // - Recommend passive filters for moderate distortion (5% < THD ≤ 10%).
+  // - Recommend active filters for high distortion (THD > 10%).
+  // - ROI is calculated as payback period in years (cost of filter / annual savings).
+
     let recommendedSolution = "";
-    let estimatedRoi = 0;
+    let estimatedRoiYears = 0;
 
     if (harmonics <= 0.05) {
         recommendedSolution = "No mitigation required";
-        estimatedRoi = 0;
     } else if (harmonics <= 0.1) {
         recommendedSolution = "Passive harmonic filters";
-        estimatedRoi = totalCost > passiveFilterCost ? totalCost / passiveFilterCost : 0;
+        estimatedRoiYears = passiveFilterCost / totalCost;
     } else {
         recommendedSolution = "Active harmonic filters";
-        estimatedRoi = totalCost > activeFilterCost ? totalCost / activeFilterCost : 0;
+        estimatedRoiYears = activeFilterCost / totalCost;
     }
 
     setResults({
-        annualLosses: parseFloat(annualLosses.toFixed(2)),
-        penalties: parseFloat(penalties.toFixed(2)),
-        equipmentLifeReduction: parseFloat(equipmentLifeReduction.toFixed(2)),
-        totalCost: parseFloat(totalCost.toFixed(2)),
-        recommendedSolution,
-        estimatedRoi: parseFloat(estimatedRoi.toFixed(2)),
+      annualLosses: parseFloat(annualLosses.toFixed(2)),
+      penalties: parseFloat(penalties.toFixed(2)),
+      equipmentLifeReduction: parseFloat(equipmentLifeReduction.toFixed(2)),
+      totalCost: parseFloat(totalCost.toFixed(2)),
+      recommendedSolution,
+      estimatedRoi: parseFloat(estimatedRoiYears.toFixed(2)),
     });
 
     setShowResults(true);
-};
+  };
 
 
   const handleReset = () => {
@@ -100,10 +123,10 @@ export default function HarmonicCalculator() {
 
   const handleDownloadReport = () => {
     const doc = new jsPDF()
-  
+
     doc.setFontSize(18)
     doc.text("Harmonic Cost Analysis Report", 20, 20)
-  
+
     doc.setFontSize(12)
     doc.text(`Transformer Capacity: ${transformerCapacity} kVA`, 20, 40)
     doc.text(`Average Load Factor: ${loadFactor}%`, 20, 50)
@@ -116,7 +139,7 @@ export default function HarmonicCalculator() {
     doc.text(`Regulatory Penalties: ₹${results.penalties.toLocaleString(undefined, { maximumFractionDigits: 2 })}`, 20, 120)
     doc.text(`Equipment Life Reduction: ${results.equipmentLifeReduction.toFixed(1)}%`, 20, 130)
     doc.text(`Total Annual Cost: ₹${results.totalCost.toLocaleString(undefined, { maximumFractionDigits: 2 })}`, 20, 140)
-  
+
     doc.addPage()
     doc.text("Detailed Analysis:", 20, 20)
     doc.text("Losses Breakdown:", 20, 30)
@@ -305,10 +328,10 @@ export default function HarmonicCalculator() {
                     </div>
 
                     <div className="flex justify-end">
-                    <Button variant="outline" onClick={handleDownloadReport}>
-                      <Download className="mr-2 h-4 w-4" /> 
-                      Download Report
-                    </Button>
+                      <Button variant="outline" onClick={handleDownloadReport}>
+                        <Download className="mr-2 h-4 w-4" />
+                        Download Report
+                      </Button>
                     </div>
                   </TabsContent>
 

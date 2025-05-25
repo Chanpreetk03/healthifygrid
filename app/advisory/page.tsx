@@ -19,7 +19,6 @@ export default function IscIlAdvisory() {
   const [shortCircuitCurrent, setShortCircuitCurrent] = useState("")
   const [loadCurrent, setLoadCurrent] = useState("")
   const [voltageLevel, setVoltageLevel] = useState("")
-  const [systemType, setSystemType] = useState("")
   const [userTdd, setUserTdd] = useState("")
 
   // Results state
@@ -105,7 +104,6 @@ export default function IscIlAdvisory() {
     setShortCircuitCurrent("")
     setLoadCurrent("")
     setVoltageLevel("")
-    setSystemType("")
     setUserTdd("")
     setShowResults(false)
   }
@@ -214,19 +212,7 @@ export default function IscIlAdvisory() {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="system-type">System Type</Label>
-                <Select value={systemType} onValueChange={setSystemType} required>
-                  <SelectTrigger id="system-type">
-                    <SelectValue placeholder="Select system type" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="general">General Distribution System</SelectItem>
-                    <SelectItem value="dedicated">Dedicated System</SelectItem>
-                    <SelectItem value="special">Special Applications</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+              
 
               <div className="space-y-2">
                 <Label htmlFor="current-tdd">
