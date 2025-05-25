@@ -15,7 +15,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { topics } from "../../constants";
 import {
     Select,
     SelectContent,
@@ -35,51 +34,36 @@ export default function NewTopicPage() {
     const router=useRouter();
 
     const handleSubmit = async (e: React.FormEvent) => {
-      
         e.preventDefault();
         setIsSubmitting(true);
-       
 
-        // Simulate API call
         try {
-            // In a real app, you would send this data to your API
-            console.log("Submitting new topic:", {
-                title,
-                content,
-                category,
-                tags,
+            const response = await fetch('/api/topics', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    title,
+                    content,
+                    category,
+                    tags: tags.split(',').map((tag) => tag.trim()), // Convert tags to an array
+                    author: 'self', // Replace with the actual author if available
+                    avatar: '/placeholder.svg?height=40&width=40', // Default avatar
+                }),
             });
 
-            console.log(topics);
+            if (!response.ok) {
+                throw new Error('Failed to create topic');
+            }
 
-            const id = topics[topics.length - 1].id;
-
-            const data = {
-                id: id + 1,
-                title: title,
-                author: "self",
-                avatar: "/placeholder.svg?height=40&width=40",
-                replies: 10,
-                views: 45,
-                category: category,
-                tags: tags,
-                lastActivity: "5 days ago",
-            };
-
-            topics.push(data);
-
-
-            
-            // window.location.href = "/forum";
-            
-
-            
+            // Redirect to the forum page after successful submission
+            router.push('/forum');
         } catch (error) {
-            console.error("Error creating topic:", error);
+            console.error('Error creating topic:', error);
             setIsSubmitting(false);
         } finally {
             setIsSubmitting(false);
-            router.push("/forum");
         }
     };
 
