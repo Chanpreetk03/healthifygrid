@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { topics } from '../constants'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -15,26 +14,32 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import userIcon from '@/assests/userLogo.webp'
+import { Topic } from '@/lib/generated/prisma'
+
+// Fetch topics from the database
+async function fetchTopics() {
+	const res = await fetch('/api/topics')
+	if (!res.ok) {
+		throw new Error('Failed to fetch topics')
+	}
+	return res.json()
+}
 
 export default function ForumPage() {
 	const [searchQuery, setSearchQuery] = useState('')
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-	const [filteredTopics, setFilteredTopics] = useState<
-		{
-			id: number
-			title: string
-			author: string
-			avatar: string
-			replies: number
-			views: number
-			category: string
-			lastActivity: string
-		}[]
-	>([])
+	const [filteredTopics, setFilteredTopics] = useState<Topic[]>([])
+
+	useEffect(() => {
+		// Fetch topics from the API
+		fetchTopics()
+			.then((data) => setFilteredTopics(data))
+			.catch((err) => console.error(err))
+	}, [])
 
 	// Filter topics based on search query and selected categories
 	useEffect(() => {
-		let filtered = [...topics]
+		let filtered = [...filteredTopics]
 
 		// Filter by search query
 		if (searchQuery) {
@@ -53,6 +58,7 @@ export default function ForumPage() {
 		}
 
 		setFilteredTopics(filtered)
+		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [searchQuery, selectedCategories])
 
 	// Toggle category selection
@@ -69,7 +75,7 @@ export default function ForumPage() {
 	}
 
 	// Get all unique categories
-	const categories = Array.from(new Set(topics.map((topic) => topic.category)))
+	const categories = Array.from(new Set(filteredTopics.map((topic) => topic.category)))
 
 	return (
 		<div className='container mx-auto px-4 sm:px-6 lg:px-8 py-12'>
@@ -85,7 +91,6 @@ export default function ForumPage() {
 					</Link>
 				</Button>
 			</div>
-
 			{/* Search and Filter */}
 			<div className='flex flex-col md:flex-row gap-4 mb-8'>
 				<div className='relative flex-grow'>
@@ -135,7 +140,6 @@ export default function ForumPage() {
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>
-
 			{/* Active Filters */}
 			{selectedCategories.length > 0 && (
 				<div className='flex flex-wrap gap-2 mb-4'>
@@ -152,40 +156,37 @@ export default function ForumPage() {
 					</Button>
 				</div>
 			)}
-
 			{/* Topics List */}
 			<div className='space-y-4'>
-				{(filteredTopics.length > 0 ? filteredTopics : searchQuery || selectedCategories.length > 0 ? [] : topics).map(
-					(topic) => (
-						<Card key={topic.id} className='hover:shadow-md transition-shadow'>
-							<CardContent className='p-6'>
-								<div className='flex items-start gap-4'>
-									<div className='hidden md:block'>
-										<Image src={userIcon} alt={topic.author} width={40} height={40} className='rounded-full' />
-									</div>
-									<div className='flex-grow'>
-										<Link href={`/forum/topic/${topic.id}`} className='text-lg font-semibold hover:text-primary'>
-											{topic.title}
-										</Link>
-										<div className='flex flex-wrap gap-x-6 gap-y-2 mt-2 text-sm text-muted-foreground'>
-											<div>By: {topic.author}</div>
-											<div className='flex items-center'>
-												<MessageSquare className='mr-1 h-4 w-4' />
-												{topic.replies} replies
-											</div>
-											<div>Category: {topic.category}</div>
-											<div>Last activity: {topic.lastActivity}</div>
+				{filteredTopics.map((topic) => (
+					<Card key={topic.id} className='hover:shadow-md transition-shadow'>
+						<CardContent className='p-6'>
+							<div className='flex items-start gap-4'>
+								<div className='hidden md:block'>
+									<Image src={userIcon} alt={topic.author} width={40} height={40} className='rounded-full' />
+								</div>
+								<div className='flex-grow'>
+									<Link href={`/forum/topic/${topic.id}`} className='text-lg font-semibold hover:text-primary'>
+										{topic.title}
+									</Link>
+									<div className='flex flex-wrap gap-x-6 gap-y-2 mt-2 text-sm text-muted-foreground'>
+										<div>By: {topic.author}</div>
+										<div className='flex items-center'>
+											<MessageSquare className='mr-1 h-4 w-4' />
+											{topic.replies} replies
 										</div>
-									</div>
-									<div className='hidden md:flex flex-col items-center justify-center bg-muted px-4 py-2 rounded-md'>
-										<div className='text-2xl font-bold'>{topic.replies}</div>
-										<div className='text-xs text-muted-foreground'>Replies</div>
+										<div>Category: {topic.category}</div>
+										<div>Last activity: {topic.lastActivity}</div>
 									</div>
 								</div>
-							</CardContent>
-						</Card>
-					)
-				)}
+								<div className='hidden md:flex flex-col items-center justify-center bg-muted px-4 py-2 rounded-md'>
+									<div className='text-2xl font-bold'>{topic.replies}</div>
+									<div className='text-xs text-muted-foreground'>Replies</div>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+				))}
 
 				{/* No results message */}
 				{(searchQuery || selectedCategories.length > 0) && filteredTopics.length === 0 && (
@@ -198,29 +199,27 @@ export default function ForumPage() {
 					</div>
 				)}
 			</div>
-
-			{/* Pagination
-      {filteredTopics.length > 0 && (
-        <div className="flex justify-center mt-8">
-          <div className="flex gap-2">
-            <Button variant="outline" size="sm" disabled>
-              Previous
-            </Button>
-            <Button variant="outline" size="sm" className="bg-primary text-primary-foreground">
-              1
-            </Button>
-            <Button variant="outline" size="sm">
-              2
-            </Button>
-            <Button variant="outline" size="sm">
-              3
-            </Button>
-            <Button variant="outline" size="sm">
-              Next
-            </Button>
-          </div>
-        </div>
-      )} */}
+			{filteredTopics.length > 0 && (
+				<div className='flex justify-center mt-8'>
+					<div className='flex gap-2'>
+						<Button variant='outline' size='sm' disabled>
+							Previous
+						</Button>
+						<Button variant='outline' size='sm' className='bg-primary text-primary-foreground'>
+							1
+						</Button>
+						<Button variant='outline' size='sm'>
+							2
+						</Button>
+						<Button variant='outline' size='sm'>
+							3
+						</Button>
+						<Button variant='outline' size='sm'>
+							Next
+						</Button>
+					</div>
+				</div>
+			)}
 		</div>
 	)
 }
