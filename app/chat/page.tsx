@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, ChangeEvent } from 'react'
 import { useChat } from '@ai-sdk/react'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
@@ -55,16 +55,15 @@ export default function Chat() {
 						</CardTitle>
 					</CardHeader>
 
-					<CardContent className='flex-1 p-0'>
-						<ScrollArea className='h-full p-4' ref={scrollAreaRef}>
+					{/* Add min-h-0 and overflow-hidden to ensure scroll containment */}
+					<CardContent className='flex-1 p-0 flex flex-col min-h-0 overflow-hidden'>
+						{/* Add h-full and min-h-0 to ScrollArea */}
+						<ScrollArea className='h-full min-h-0 p-4' ref={scrollAreaRef}>
 							<div className='space-y-4'>
 								{messages.map((message) => (
 									<div
 										key={message.id}
-										className={`flex gap-3 ${
-											message.role === 'user' ? 'justify-end' : 'justify-start'
-										}`}
-									>
+										className={`flex gap-3 ${message.role === 'user' ? 'justify-end' : 'justify-start'}`}>
 										{message.role !== 'user' && (
 											<div className='flex-shrink-0'>
 												<div className='w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center'>
@@ -75,27 +74,19 @@ export default function Chat() {
 
 										<div
 											className={`max-w-[80%] rounded-lg px-4 py-2 ${
-												message.role === 'user'
-													? 'bg-primary text-primary-foreground ml-auto'
-													: 'bg-muted'
-											}`}
-										>
+												message.role === 'user' ? 'bg-primary text-primary-foreground ml-auto' : 'bg-muted'
+											}`}>
 											<div className='whitespace-pre-wrap'>
 												{message.parts
 													? message.parts.map((part, i) =>
-															part.type === 'text' ? (
-																<div key={`${message.id}-${i}`}>{part.text}</div>
-															) : null
+															part.type === 'text' ? <div key={`${message.id}-${i}`}>{part.text}</div> : null
 													  )
 													: null}
 											</div>
 											<div
 												className={`text-xs mt-1 ${
-													message.role === 'user'
-														? 'text-primary-foreground/70'
-														: 'text-muted-foreground'
-												}`}
-											>
+													message.role === 'user' ? 'text-primary-foreground/70' : 'text-muted-foreground'
+												}`}>
 												{formatTime(message.createdAt)}
 											</div>
 										</div>
@@ -157,10 +148,9 @@ export default function Chat() {
 						onClick={() => {
 							if (!isLoading) {
 								const event = { target: { value: 'How do I calculate TDD for my system?' } }
-								handleInputChange(event as any)
+								handleInputChange(event as ChangeEvent<HTMLInputElement>)
 							}
-						}}
-					>
+						}}>
 						<h3 className='font-medium mb-2'>Calculate TDD</h3>
 						<p className='text-sm text-muted-foreground'>Learn how to calculate Total Demand Distortion</p>
 					</Card>
@@ -170,10 +160,9 @@ export default function Chat() {
 						onClick={() => {
 							if (!isLoading) {
 								const event = { target: { value: 'What are the best harmonic mitigation techniques?' } }
-								handleInputChange(event as any)
+								handleInputChange(event as ChangeEvent<HTMLInputElement>)
 							}
-						}}
-					>
+						}}>
 						<h3 className='font-medium mb-2'>Mitigation Techniques</h3>
 						<p className='text-sm text-muted-foreground'>Explore harmonic filtering solutions</p>
 					</Card>
@@ -183,10 +172,9 @@ export default function Chat() {
 						onClick={() => {
 							if (!isLoading) {
 								const event = { target: { value: 'What are PSERC penalty regulations?' } }
-								handleInputChange(event as any)
+								handleInputChange(event as ChangeEvent<HTMLInputElement>)
 							}
-						}}
-					>
+						}}>
 						<h3 className='font-medium mb-2'>PSERC Regulations</h3>
 						<p className='text-sm text-muted-foreground'>Understand compliance requirements</p>
 					</Card>
