@@ -28,18 +28,22 @@ async function fetchTopics() {
 export default function ForumPage() {
 	const [searchQuery, setSearchQuery] = useState('')
 	const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-	const [filteredTopics, setFilteredTopics] = useState<Topic[]>([])
+	const [topics, setTopics] = useState<Topic[]>([]) // Full list of topics
+	const [filteredTopics, setFilteredTopics] = useState<Topic[]>([]) // Filtered list of topics
 
 	useEffect(() => {
 		// Fetch topics from the API
 		fetchTopics()
-			.then((data) => setFilteredTopics(data))
+			.then((data) => {
+				setTopics(data) // Set the full list of topics
+				setFilteredTopics(data) // Initialize the filtered list
+			})
 			.catch((err) => console.error(err))
 	}, [])
 
 	// Filter topics based on search query and selected categories
 	useEffect(() => {
-		let filtered = [...filteredTopics]
+		let filtered = [...topics] // Always start filtering from the full list
 
 		// Filter by search query
 		if (searchQuery) {
@@ -58,8 +62,7 @@ export default function ForumPage() {
 		}
 
 		setFilteredTopics(filtered)
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [searchQuery, selectedCategories])
+	}, [searchQuery, selectedCategories, topics]) // Include `topics` as a dependency
 
 	// Toggle category selection
 	const toggleCategory = (category: string) => {
@@ -75,7 +78,7 @@ export default function ForumPage() {
 	}
 
 	// Get all unique categories
-	const categories = Array.from(new Set(filteredTopics.map((topic) => topic.category)))
+	const categories = Array.from(new Set(topics.map((topic) => topic.category)))
 
 	return (
 		<div className='container mx-auto px-4 sm:px-6 lg:px-8 py-12'>
