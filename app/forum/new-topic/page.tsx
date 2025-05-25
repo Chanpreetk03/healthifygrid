@@ -52,9 +52,9 @@ export default function NewTopicPage() {
 
             console.log(topics);
 
-            let id = topics[topics.length - 1].id;
+            const id = topics[topics.length - 1].id;
 
-            let data = {
+            const data = {
                 id: id + 1,
                 title: title,
                 author: "self",
@@ -63,7 +63,7 @@ export default function NewTopicPage() {
                 views: 45,
                 category: category,
                 tags: tags,
-                LastActivity: "5 days ago",
+                lastActivity: "5 days ago",
             };
 
             topics.push(data);
