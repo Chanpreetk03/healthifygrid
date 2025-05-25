@@ -1,19 +1,26 @@
 import { prisma } from '@/lib/prisma';
 import { NextResponse } from 'next/server';
 
-export async function GET(req: Request, { params }: { params: { id: string } }) {
-    try {
-        const topic = await prisma.topic.findUnique({
-            where: { id: params.id },
-        });
+interface RouteParams {
+  params: Promise<{
+    id: string;
+  }>;
+}
 
-        if (!topic) {
-            return NextResponse.json({ error: 'Topic not found' }, { status: 404 });
-        }
+export async function GET(req: Request, { params }: RouteParams) {
+  try {
+    const resolvedParams = await params; // Resolve the Promise
+    const topic = await prisma.topic.findUnique({
+      where: { id: resolvedParams.id },
+    });
 
-        return NextResponse.json(topic);
-    } catch (error) {
-        console.error(error);
-        return NextResponse.json({ error: 'Failed to fetch topic' }, { status: 500 });
+    if (!topic) {
+      return NextResponse.json({ error: 'Topic not found' }, { status: 404 });
     }
+
+    return NextResponse.json(topic);
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: 'Failed to fetch topic' }, { status: 500 });
+  }
 }

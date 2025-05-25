@@ -14,7 +14,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import userIcon from '@/assests/userLogo.webp'
-import { Topic } from '@/lib/generated/prisma'
+import { Topic } from '@prisma/client'
 
 // Fetch topics from the database
 async function fetchTopics() {
