@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Download, Calculator, AlertTriangle, CheckCircle, Info } from "lucide-react"
 import { jsPDF } from "jspdf"
+import { useUser } from "@clerk/nextjs"
 
 export default function HarmonicCalculator() {
   // Form state
@@ -18,7 +19,7 @@ export default function HarmonicCalculator() {
   const [thd, setThd] = useState("")
   const [operatingHours, setOperatingHours] = useState("")
   const [electricityRate, setElectricityRate] = useState("")
-
+  const user =useUser();
   // Results state
   const [showResults, setShowResults] = useState(false)
   const [results, setResults] = useState({
@@ -30,7 +31,7 @@ export default function HarmonicCalculator() {
     estimatedRoi: 0,
   })
 
-  const handleCalculate = (e: React.FormEvent) => {
+  const handleCalculate = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const capacity = Number.parseFloat(transformerCapacity) || 0;
@@ -99,16 +100,40 @@ const equipmentLifeReduction = lifeReduction * 100;
         estimatedRoiYears = activeFilterCost / totalCost;
     }
 
-    setResults({
+    const calculatedResults = {
       annualLosses: parseFloat(annualLosses.toFixed(2)),
       penalties: parseFloat(penalties.toFixed(2)),
       equipmentLifeReduction: parseFloat(equipmentLifeReduction.toFixed(2)),
       totalCost: parseFloat(totalCost.toFixed(2)),
       recommendedSolution,
       estimatedRoi: parseFloat(estimatedRoiYears.toFixed(2)),
-    });
+      calculatedAt: new Date().toISOString(),
+    };
+    setResults(calculatedResults);
 
     setShowResults(true);
+
+    try {
+      const response = await fetch('/api/profile', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId:user?.user?.id, // Replace with dynamic userName if available
+          cost: calculatedResults,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Failed to save results to the server');
+      }
+  
+      const data = await response.json();
+      console.log('Saved results:', data);
+    } catch (error) {
+      console.error('Error saving results:', error);
+    }
   };
 
 

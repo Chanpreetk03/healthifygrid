@@ -26,3 +26,10 @@ model Topic {
   views        Int      @default(0)
   lastActivity String
 }
+
+model Profile{
+ id           String   @id @default(auto()) @map("_id") @db.ObjectId
+ userId       String   @unique
+ cost         Json[]
+ isc_il       Json[]
+}
