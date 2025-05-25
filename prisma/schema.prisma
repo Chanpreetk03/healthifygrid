@@ -36,3 +36,10 @@ model Reply {
   topicId   String
   topic     Topic    @relation(fields: [topicId], references: [id], name: "TopicReplies")
 }
+
+model Profile{
+ id           String   @id @default(auto()) @map("_id") @db.ObjectId
+ userId       String   @unique
+ cost         Json[]
+ isc_il       Json[]
+}

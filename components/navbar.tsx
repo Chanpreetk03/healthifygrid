@@ -42,7 +42,11 @@ export default function Navbar() {
                 Chat
               </Button>
             </Link>
-
+            <Link href="/profile" className="ml-4">
+              <Button variant="outline" size="sm">
+                Profile
+              </Button>
+            </Link>
             <SignedIn>
               <UserButton />
             </SignedIn>
@@ -83,11 +87,11 @@ export default function Navbar() {
             <Link href="/advisory" className="block px-3 py-2 text-base font-medium hover:bg-muted rounded-md">
               Isc/Il Advisory
             </Link>
-            <Link href="/chat" className="block px-3 py-2 text-base font-medium hover:bg-muted rounded-md">
-              Chat
-            </Link>
             <div className="flex space-x-2 mt-4">
               <SignedIn>
+                <Link href="/chat" className="block px-3 py-2 text-base font-medium hover:bg-muted rounded-md">
+                  Chat
+                </Link>
                 <UserButton />
               </SignedIn>
               <SignedOut>
