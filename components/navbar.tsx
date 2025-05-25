@@ -3,7 +3,8 @@
 import Link from "next/link"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Menu, X, Zap } from "lucide-react"
+import { Menu, X, Zap, MessageSquare } from "lucide-react"
+import { SignedIn, SignedOut, UserButton, SignInButton } from "@clerk/nextjs"
 
 export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
@@ -35,14 +36,24 @@ export default function Navbar() {
             <Link href="/advisory" className="text-foreground hover:text-primary px-3 py-2 text-sm font-medium">
               Isc/Il Advisory
             </Link>
-            <Link href="/login" className="ml-4">
+            <Link href="/chat" className="ml-4">
               <Button variant="outline" size="sm">
-                Login
+                <MessageSquare className="mr-2 h-4 w-4" />
+                Chat
               </Button>
             </Link>
-            <Link href="/register">
-              <Button size="sm">Register</Button>
-            </Link>
+
+            <SignedIn>
+              <UserButton />
+            </SignedIn>
+
+            <SignedOut>
+              <SignInButton>
+                <Button variant="outline" size="sm">
+                  Login / Register
+                </Button>
+              </SignInButton>
+            </SignedOut>
           </nav>
 
           <div className="md:hidden">
@@ -72,15 +83,20 @@ export default function Navbar() {
             <Link href="/advisory" className="block px-3 py-2 text-base font-medium hover:bg-muted rounded-md">
               Isc/Il Advisory
             </Link>
+            <Link href="/chat" className="block px-3 py-2 text-base font-medium hover:bg-muted rounded-md">
+              Chat
+            </Link>
             <div className="flex space-x-2 mt-4">
-              <Link href="/login" className="w-1/2">
-                <Button variant="outline" className="w-full">
-                  Login
-                </Button>
-              </Link>
-              <Link href="/register" className="w-1/2">
-                <Button className="w-full">Register</Button>
-              </Link>
+              <SignedIn>
+                <UserButton />
+              </SignedIn>
+              <SignedOut>
+                <SignInButton>
+                  <Button variant="outline" className="w-full">
+                    Login / Register
+                  </Button>
+                </SignInButton>
+              </SignedOut>
             </div>
           </div>
         </div>
@@ -88,4 +104,3 @@ export default function Navbar() {
     </header>
   )
 }
-
